@@ -1,3 +1,5 @@
+//go:build dreaming
+
 package tests
 
 import (
@@ -22,7 +24,7 @@ import (
 
 var (
 	fqdn       = "testing_website_builder.com."
-	regexFqdn  = "qkfkkvlaw2.g.testdns.localtau."
+	regexFqdn  = "qkfkkvlaw2.g.testdns_dreaming.localtau."
 	failedFqdn = "asdhw23.g.test.localtau."
 )
 
@@ -33,7 +35,7 @@ func createDnsClient(net string) *dns.Client {
 	return c
 }
 
-func TestDns(t *testing.T) {
+func TestDns_Dreaming(t *testing.T) {
 	seerClient.DefaultUsageBeaconInterval = 100 * time.Millisecond
 	seerClient.DefaultAnnounceBeaconInterval = 100 * time.Millisecond
 	seerClient.DefaultGeoBeaconInterval = 100 * time.Millisecond
@@ -61,7 +63,7 @@ func TestDns(t *testing.T) {
 	// Create Tcp Client
 	tcpClient := createDnsClient("tcp")
 	md := new(dns.Msg)
-	md.SetQuestion("substrate.tau.testdns.localtau.", dns.TypeA)
+	md.SetQuestion("substrate.tau.testdns_dreaming.localtau.", dns.TypeA)
 
 	// Wait for services to start and register
 	for {
