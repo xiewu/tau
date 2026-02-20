@@ -33,15 +33,23 @@ import (
 	_ "github.com/taubyte/tau/clients/p2p/tns/dream"
 )
 
+// getAvailablePort finds an available port by listening on port 0
+func getAvailablePort() (int, error) {
+	listener, err := net.Listen("tcp", ":0")
+	if err != nil {
+		return 0, err
+	}
+	defer listener.Close()
+	return listener.Addr().(*net.TCPAddr).Port, nil
+}
+
 func TestMCPServer(t *testing.T) {
 	multiverse, err := dream.New(t.Context())
 	assert.NilError(t, err)
 	defer multiverse.Close()
 
-	listener, err := net.Listen("tcp", "127.0.0.1:0")
+	port, err := getAvailablePort()
 	assert.NilError(t, err)
-	port := listener.Addr().(*net.TCPAddr).Port
-	listener.Close()
 
 	httpService, err := httpBasic.New(
 		multiverse.Context(),
@@ -58,7 +66,7 @@ func TestMCPServer(t *testing.T) {
 	endpoint := fmt.Sprintf("http://127.0.0.1:%d%s", port, MCPEndpoint)
 
 	httpClient := &http.Client{Timeout: 2 * time.Second}
-	for i := 0; i < 20; i++ {
+	for range 20 {
 		resp, err := httpClient.Get(endpoint)
 		if err == nil {
 			resp.Body.Close()
@@ -73,7 +81,7 @@ func TestMCPServer(t *testing.T) {
 	}, nil)
 
 	transport := &mcp.StreamableClientTransport{
-		Endpoint:   endpoint,
+		Endpoint:   fmt.Sprintf("http://localhost:%d%s", port, MCPEndpoint),
 		HTTPClient: &http.Client{Timeout: 10 * time.Second},
 	}
 
